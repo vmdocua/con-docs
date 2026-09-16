@@ -4,11 +4,11 @@
 
 We have a distributed dataset system with multiple boxes and workflows.
 
-### Box A — `reprostim-reproiner`
+### Box A — `reproiner`
 
 Box A (`reproiner`) captures video from the experiment video projector.
 
-It automatically collects the recorded videos and stores them in the local `reprostim-reproiner` dataset annex. The dataset is synchronized daily to the other nodes.
+It automatically collects the recorded videos and stores them in the local `reprostim-reproiner` annexed dataset. The dataset is synchronized daily to the other nodes.
 
 ### Box B — `typhon`
 

@@ -111,11 +111,50 @@ In Python, we use the platform-independent [`filelock`](https://pypi.org/project
 
 The important property is that cooperating processes use the same lock, so they can coordinate access to `videos.tsv`.
 
-## Exclusive Access
+## Python `FileLock` Sample
 
-A global `videos.tsv` lock can be used for operations that need exclusive access to the entire table.
+`filelock.FileLock` can be used either as a blocking lock or with a timeout.
 
-For example, a shell script can use `flock` to ensure that only one instance of a particular workflow is running at a time.
+```python
+from filelock import FileLock, Timeout
+
+# Lock 1: wait indefinitely until the lock becomes available.
+lock1 = FileLock(f"videos.tsv.lock")
+
+with lock1:
+    print("Lock acquired. Processing task-1...")
+    print("Lock acquired. Processing task-2...")
+    print("Lock acquired. Processing task-N...")
+
+
+# Lock 2: wait up to 5 seconds.
+lock2 = FileLock(f"videos.tsv.lock", timeout=5)
+
+try:
+    with lock2:
+        print("Lock acquired. Processing job-1...")
+        print("Lock acquired. Processing job-2...")
+        print("Lock acquired. Processing job-N...")
+
+except Timeout:
+    logger.error("Could not acquire lock2 within 5 seconds")
+```
+
+Both locks use the same `videos.tsv.lock` file, so they coordinate with each other:
+
+```text
+lock1 = FileLock("videos.tsv.lock")
+    → waits indefinitely for the lock
+
+lock2 = FileLock("videos.tsv.lock", timeout=5)
+    → waits up to 5 seconds
+    → raises Timeout if the lock is still held
+```
+
+In both cases, the lock is automatically released when the `with` block exits.
+
+## Unix `flock` Sample
+
 Below is an example of a shell script fragment that uses `flock` to acquire an exclusive lock on a lock file before 
 proceeding with its work:
 
@@ -135,11 +174,18 @@ mkdir -p "$HOME/.run"
     # Place protected workflow and actions here
     echo "Do some work"
     echo "Some other work 2"
-    echo "Some other work" 3"
+    echo "Some other work 3"
 
 } 200>"$lock_file"
 
 ```
+
+
+## Exclusive Access
+
+A global `videos.tsv` lock can be used for operations that need exclusive access to the entire table.
+
+For example, a shell script can use `flock` to ensure that only one instance of a particular workflow is running at a time.
 
 This is useful when the whole workflow should be serialized.
 

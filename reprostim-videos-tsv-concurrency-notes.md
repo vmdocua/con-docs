@@ -201,7 +201,7 @@ The update operation can therefore be treated similarly to a database table oper
 The important point is that the process should **not** keep an old copy of the table and write that copy back later. 
 Instead, when saving, it should load the latest version of `videos.tsv` again, because another process may have modified it since the initial read.
 
-Also lock time should as small and fast as possible, so that other processes can acquire the lock and update the table.
+Also lock time should be as small and fast as possible, so that other processes can acquire the lock and update the table.
 
 
 Conceptually:

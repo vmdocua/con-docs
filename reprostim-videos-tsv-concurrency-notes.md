@@ -12,7 +12,7 @@ It automatically collects the recorded videos and stores them in the local `repr
 
 ### Box B — `typhon`
 
-Box B (`typhon`) contains the `dbic-reproflow` superdataset, which includes `reprostim-reproiner`, `dbic-QA`, `reprostim-birch`, and other subdatasets.
+Box B (`typhon`) contains the `dbic-reproflow` superdataset, which includes `reprostim-reproiner`, [`dbic-QA`](https://github.com/dbic/QA/tree/with-reprostim-videos), `reprostim-birch`, and other subdatasets.
 
 It is used for processing and analysis of the collected data.
 
@@ -31,8 +31,8 @@ The `video-audit` command is used to create and update this media database.
 * **internal** — extracts information directly from the video file, such as duration, resolution, codec, etc.
 * **external tools**
 
-  * **`qr`** — performs QR-code-based analysis and generates `qrinfo` files. This processing is relatively slow.
-  * **`nosignal`** — detects no-signal segments in the video and records their percentage. This processing is also relatively slow.
+  * **`qr`** — performs QR-code-based analysis and generates `qrinfo` files. This processing is very slow.
+  * **`nosignal`** — detects no-signal segments in the video and records their percentage. This processing is also relatively slow but faster than `qr` one.
 
 There are several scripts that run daily and process videos using `video-audit`. These scripts can run in parallel, for example:
 
@@ -58,7 +58,7 @@ The problem is similar to concurrent access to a database table:
 
 The challenge is therefore to provide some DB-like concurrency control while keeping `videos.tsv` as a plain file.
 
-# RDBMS-Inspired Notes
+# RDBS-Inspired Notes
 
 When robustness, consistency, and concurrent access are important, an RDBMS provides well-established mechanisms for handling these problems.
 

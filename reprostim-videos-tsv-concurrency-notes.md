@@ -181,7 +181,26 @@ mkdir -p "$HOME/.run"
 
 ```
 
+# Workflow Scripts and the Single-Instance Lock
 
+The daily processing described earlier (processing new videos, recovering previously failed videos, reprocessing failed external-tool operations) is implemented as bash scripts that can be started manually, triggered by cron, or invoked from some other hook.
+
+Because the same script can be started more than once — for example, a cron-triggered run overlapping with a manual run, or two cron schedules overlapping — we need to guarantee that only one instance of a given script is running on the box at any time.
+
+This is a different concern than the `videos.tsv` table lock described below: it guards the whole execution of a script (a *workflow*), not an individual update of `videos.tsv`.
+
+Each such script uses the same `flock`-based mechanism shown in the [Unix `flock` Sample](#unix-flock-sample) above, but with its own dedicated lock file, for example:
+
+```text
+foo-job-1.lock
+```
+
+The lock is acquired non-blocking (`flock -n`) at the very start of the script and held for its entire run:
+
+* if the lock is acquired, the script proceeds with its work, including any `video-audit` processing;
+* if the lock is already held, the script assumes another instance of itself is already running, logs a message, and exits immediately instead of queuing up.
+
+Since each script has its own lock file, different scripts can still run concurrently on the same box — only multiple instances of the *same* script are serialized.
 
 # `video-audit` and the `videos.tsv` Table Lock
 

@@ -145,14 +145,16 @@ Conceptually:
 ```text
 Process A                         Process B
 
-acquire videos.tsv.lock
+>> acquire videos.tsv.lock
 read videos.tsv
-release lock
+<< release lock
+
 ...
-                                  acquire videos.tsv.lock
+
+                                  >> acquire videos.tsv.lock
                                   read videos.tsv
-                                  process video B
-                                  release lock
+                                  << release lock
+
                                   ...
                                   do some long processing
                                   for video B
@@ -161,17 +163,19 @@ release lock
 do some long processing
 for video A
 ...
-acquire videos.tsv.lock
+
+>> acquire videos.tsv.lock
 reload videos.tsv
 merge changes for video A
 write videos.tsv
-release lock
+<< release lock
+                                  ...  
 
-                                  acquire videos.tsv.lock
+                                  >> acquire videos.tsv.lock
                                   reload videos.tsv
                                   merge changes for video B
                                   write videos.tsv
-                                  release lock
+                                  << release lock
 ```
 
 This prevents Process B from accidentally overwriting the changes made by Process A.

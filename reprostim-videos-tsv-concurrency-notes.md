@@ -116,6 +116,30 @@ The important property is that cooperating processes use the same lock, so they 
 A global `videos.tsv` lock can be used for operations that need exclusive access to the entire table.
 
 For example, a shell script can use `flock` to ensure that only one instance of a particular workflow is running at a time.
+Below is an example of a shell script fragment that uses `flock` to acquire an exclusive lock on a lock file before 
+proceeding with its work:
+
+```bash
+lock_file="$HOME/.run/foo-job-1.lock"
+
+# Ensure the lock directory exists
+mkdir -p "$HOME/.run"
+
+{
+    # Try to acquire the lock hardcoded to fd 200 without waiting
+    flock -n 200 || {
+        echo "foo-job-1 is already running for $0." >&2
+        exit 1
+    }
+
+    # Place protected workflow and actions here
+    echo "Do some work"
+    echo "Some other work 2"
+    echo "Some other work" 3"
+
+} 200>"$lock_file"
+
+```
 
 This is useful when the whole workflow should be serialized.
 

@@ -145,11 +145,22 @@ Conceptually:
 ```text
 Process A                         Process B
 
+acquire videos.tsv.lock
 read videos.tsv
-process video A
+release lock
+...
+                                  acquire videos.tsv.lock
                                   read videos.tsv
                                   process video B
-
+                                  release lock
+                                  ...
+                                  do some long processing
+                                  for video B
+                                  ...     
+...
+do some long processing
+for video A
+...
 acquire videos.tsv.lock
 reload videos.tsv
 merge changes for video A

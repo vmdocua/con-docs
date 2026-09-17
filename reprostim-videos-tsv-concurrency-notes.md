@@ -97,19 +97,20 @@ Typical SQL isolation levels are:
 
 We do not need to reproduce the full RDBMS model for `videos.tsv`, but these concepts provide a useful way to think about the problem.
 
-# File-Level Locking
+# File-Based Locking
 
 For `videos.tsv`, we can use filesystem locking to prevent conflicting operations.
 
-On Unix systems, `flock` provides advisory file locking. We use a dedicated lock file, for example:
+For synchronization we use a file-based lock: in bash it is based on the `flock` utility, and in Python on the [`filelock`](https://pypi.org/project/filelock/) package. We use a dedicated lock file, for example:
 
 ```text
 videos.tsv.lock
 ```
 
-In Python, we use the platform-independent [`filelock`](https://pypi.org/project/filelock/) package and its `FileLock` mechanism.
+* On Unix systems, `flock` provides advisory file locking, typically used from shell scripts.
+* In Python, we use the platform-independent `filelock` package and its `FileLock` mechanism.
 
-The important property is that cooperating processes use the same lock, so they can coordinate access to `videos.tsv`.
+The important property is that cooperating processes use the same lock file, so they can coordinate access to `videos.tsv` regardless of which mechanism (bash or Python) acquires it.
 
 ## Python `FileLock` Sample
 

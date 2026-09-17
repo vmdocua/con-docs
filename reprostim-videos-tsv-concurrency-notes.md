@@ -182,17 +182,8 @@ mkdir -p "$HOME/.run"
 ```
 
 
-## Exclusive Access
 
-A global `videos.tsv` lock can be used for operations that need exclusive access to the entire table.
-
-For example, a shell script can use `flock` to ensure that only one instance of a particular workflow is running at a time.
-
-This is useful when the whole workflow should be serialized.
-
-However, this can be too restrictive because different `video-audit` processes may be able to work on different videos concurrently.
-
-# `video-audit` and the TSV Table Lock
+# `video-audit` and the `videos.tsv` Table Lock
 
 There is another level of concurrency control inside `video-audit`.
 
@@ -200,16 +191,18 @@ Multiple `video-audit` processes can run in parallel and eventually need to upda
 
 The update operation can therefore be treated similarly to a database table operation:
 
-1. acquire the TSV lock;
+1. acquire the `videos.tsv` lock;
 2. load the current version of `videos.tsv`;
 3. identify the rows that need to be updated;
 4. apply only the changes produced by this process;
 5. write the updated table;
 6. release the lock.
 
-The important point is that the process should **not** keep an old copy of the table and write that copy back later.
-
+The important point is that the process should **not** keep an old copy of the table and write that copy back later. 
 Instead, when saving, it should load the latest version of `videos.tsv` again, because another process may have modified it since the initial read.
+
+Also lock time should as small and fast as possible, so that other processes can acquire the lock and update the table.
+
 
 Conceptually:
 
